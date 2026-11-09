@@ -1,0 +1,161 @@
+# =====================================================================
+#  Base de comparaison des brokers - CHRONYX
+#
+#  IMPORTANT
+#  - Ces informations NE SONT PAS une recommandation d'investissement.
+#  - Les conditions changent souvent : chaque ligne porte un statut
+#    "verifie" (avec date et source) ou "a_verifier".
+#  - Les spreads et commissions ne sont PAS renseignés ici tant qu'ils n'ont
+#    pas été relevés : le robot peut les MESURER lui-même sur un compte démo
+#    (onglet Brokers > Mesurer les spreads).
+#  - Avant toute ouverture de compte, vérifier l'autorisation du prestataire
+#    sur REGAFI (https://www.regafi.fr) et la liste noire de l'AMF.
+#
+#  Règles communes aux entités régulées dans l'UE pour les particuliers
+#  (mesures ESMA reprises par l'AMF) :
+#    - levier max 1:30 paires majeures, 1:20 or et autres paires ;
+#    - protection contre le solde négatif obligatoire ;
+#    - clôture des positions à 50 % de niveau de marge ;
+#    - avertissement standardisé sur le % de comptes perdants.
+# =====================================================================
+
+regles_ue:
+  levier_or: 20
+  levier_majeures: 30
+  solde_negatif_protege: true
+  stop_out_marge_pct: 50
+
+sources_officielles:
+  - {nom: "REGAFI (registre des agents financiers - France)", url: "https://www.regafi.fr"}
+  - {nom: "AMF - listes noires et mises en garde", url: "https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/listes-noires-et-mises-en-garde"}
+  - {nom: "CySEC - registre des entreprises d'investissement", url: "https://www.cysec.gov.cy/en-GB/entities/investment-firms/"}
+  - {nom: "ESMA - registres", url: "https://registers.esma.europa.eu"}
+
+brokers:
+  - nom: IC Markets
+    entite_ue: "IC Markets (EU) Ltd"
+    regulateur: "CySEC (Chypre)"
+    licence: "362/18"
+    passeport_france: a_verifier
+    fonds_garantie: "Investor Compensation Fund chypriote (jusqu'à 20 000 €)"
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: true
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    notes: "Compte Raw (spread + commission) souvent cité pour le scalping : à confirmer sur la grille tarifaire de l'entité UE."
+
+  - nom: Pepperstone
+    entite_ue: "Pepperstone EU Limited"
+    regulateur: "CySEC (Chypre)"
+    licence: "388/20"
+    passeport_france: a_verifier
+    fonds_garantie: "Investor Compensation Fund chypriote (jusqu'à 20 000 €)"
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: true
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    notes: "Vérifier que l'ouverture se fait bien auprès de l'entité UE (et non d'une entité hors UE)."
+
+  - nom: FP Markets
+    entite_ue: "First Prudential Markets Ltd"
+    regulateur: "CySEC (Chypre)"
+    licence: "371/18"
+    passeport_france: a_verifier
+    fonds_garantie: "Investor Compensation Fund chypriote (jusqu'à 20 000 €)"
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: true
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    notes: ""
+
+  - nom: Vantage
+    entite_ue: null
+    regulateur: "Aucune entité régulée dans l'UE identifiée à ce jour"
+    licence: null
+    passeport_france: a_verifier
+    fonds_garantie: null
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: true
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    alerte: "Sans entité UE, les protections ESMA (solde négatif, levier encadré) et le fonds de garantie européen peuvent ne pas s'appliquer. Prudence."
+    notes: "Vérifier sur REGAFI et la liste noire AMF avant tout usage."
+
+  - nom: Admirals
+    entite_ue: "Admirals Europe Ltd"
+    regulateur: "CySEC (Chypre)"
+    licence: "201/13"
+    passeport_france: a_verifier
+    fonds_garantie: "Investor Compensation Fund chypriote (jusqu'à 20 000 €)"
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: true
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    notes: "Interface et support en français à vérifier."
+
+  - nom: ActivTrades
+    entite_ue: "ActivTrades Europe S.A."
+    regulateur: "CMVM (Portugal)"
+    licence: a_verifier
+    passeport_france: a_verifier
+    fonds_garantie: "Système d'indemnisation des investisseurs portugais (à vérifier)"
+    metatrader5: true
+    robots_ea_autorises: true
+    scalping_autorise: a_verifier
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    notes: ""
+
+  - nom: XTB
+    entite_ue: "XTB S.A. (succursale française)"
+    regulateur: "KNF (Pologne), succursale déclarée en France"
+    licence: a_verifier
+    passeport_france: a_verifier
+    fonds_garantie: "Système d'indemnisation polonais (à vérifier)"
+    metatrader5: false
+    robots_ea_autorises: false
+    scalping_autorise: a_verifier
+    depot_minimum_eur: null
+    spread_xauusd_points: null
+    spread_eurusd_points: null
+    commission_lot_aller_retour_eur: null
+    lot_minimum: 0.01
+    frais_retrait: null
+    statut: a_verifier
+    alerte: "Plateforme propriétaire (xStation) sans MetaTrader 5 : INCOMPATIBLE avec CHRONYX."
+    notes: "Inclus pour information car très présent en France."

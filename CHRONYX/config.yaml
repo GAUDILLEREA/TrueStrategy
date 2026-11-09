@@ -1,0 +1,114 @@
+# =====================================================================
+#  CHRONYX AI TRADING BOT - Configuration principale
+#  Toutes les valeurs monétaires sont en EUROS sauf mention contraire.
+#  Les limites de sécurité (section "limites_absolues") ne peuvent PAS
+#  être dépassées, même en modifiant les autres paramètres.
+# =====================================================================
+
+general:
+  langue: fr
+  devise_compte: EUR
+  # Modes possibles : analyse | assistance | demo_auto | reel
+  # Le mode "reel" est refusé tant que reel.active n'est pas confirmé manuellement.
+  mode: analyse
+  fuseau_horaire: Europe/Paris
+
+capital:
+  # Capital de référence utilisé quand MetaTrader 5 n'est pas connecté.
+  capital_initial: 300.0
+
+broker:
+  # Aucun broker choisi : le robot fonctionne avec n'importe quel broker MT5.
+  nom: "non_choisi"
+  # Commission aller-retour par lot standard (en devise du compte). 0 si incluse dans le spread.
+  commission_par_lot_aller_retour: 0.0
+  # Suffixe éventuel des symboles chez le broker (ex: ".r", "m", "-ECN")
+  suffixe_symboles: ""
+
+instruments:
+  XAUUSD: {actif: true,  principal: true}
+  EURUSD: {actif: true}
+  GBPUSD: {actif: true}
+  USDJPY: {actif: true}
+  AUDUSD: {actif: false}
+  USDCAD: {actif: false}
+  USDCHF: {actif: false}
+  EURJPY: {actif: false}
+  GBPJPY: {actif: false}
+
+timeframes:
+  scalping: [M1, M5]
+  principal: M5
+  confirmation: [M15, H1]
+
+risque:
+  risque_par_trade_pct: 0.5        # 0.25 / 0.5 / 1 / 2 / personnalisé (plafonné, voir limites_absolues)
+  risk_reward: 1.5                 # 1 / 1.5 / 2 / 3 / personnalisé
+  stop_loss_atr_mult: 1.5          # Stop loss = ATR x multiplicateur
+  break_even_r: 1.0                # Passage au break-even après +1R (0 = désactivé)
+  trailing_stop_atr_mult: 0.0      # 0 = désactivé
+  trades_max_par_jour: 5
+  perte_max_jour_pct: 2.0
+  perte_max_semaine_pct: 5.0
+  drawdown_max_pct: 10.0
+  positions_simultanees_max: 1
+  pause_apres_perte_min: 30
+  spread_max_points:               # Spread maximum toléré, en points du broker
+    XAUUSD: 35
+    defaut: 20
+  # Le spread ne doit pas représenter plus de X % de la distance du stop loss
+  spread_max_pct_du_stop: 15.0
+  # La marge immobilisée par une position ne doit pas dépasser X % du capital.
+  # Le levier appliqué est celui de l'ESMA pour les particuliers (1:30 majeures, 1:20 or),
+  # ou celui du broker s'il est plus faible (lu dans MT5).
+  marge_max_pct_capital: 50
+
+limites_absolues:
+  # Garde-fous non contournables par le dashboard ou par l'IA
+  risque_par_trade_pct_max: 2.0
+  perte_max_jour_pct_max: 5.0
+  drawdown_max_pct_max: 20.0
+  martingale_autorisee: false      # Ne peut pas être activé
+  grid_autorisee: false            # Ne peut pas être activé
+
+horaires:
+  # Heures de Paris. Les heures hors de ces plages sont bloquées.
+  plages:
+    - {debut: "08:00", fin: "12:00"}
+    - {debut: "14:00", fin: "18:00"}
+  jours: [lundi, mardi, mercredi, jeudi, vendredi]
+
+calendrier:
+  minutes_avant: 15
+  minutes_apres: 15
+  impacts_bloquants: [high]
+  # Si le calendrier a plus de X heures, il est considéré comme ancien => pas de trade.
+  age_max_heures: 24
+  fichier: data/calendrier.csv
+
+strategies:
+  trend_scalping:
+    actif: true
+    ema_rapide: 20
+    ema_moyenne: 50
+    ema_lente: 200
+    rsi_periode: 14
+    rsi_achat_min: 45
+    rsi_achat_max: 70
+    rsi_vente_min: 30
+    rsi_vente_max: 55
+    atr_periode: 14
+    timeframe_confirmation: H1
+
+backtest:
+  slippage_points: 2
+  spread_points_par_defaut: 20
+
+reel:
+  # Le trading réel est DÉSACTIVÉ. Son activation se fait uniquement depuis
+  # le dashboard avec une confirmation manuelle explicite.
+  active: false
+
+journal:
+  dossier: logs
+  base_sqlite: data/chronyx.db

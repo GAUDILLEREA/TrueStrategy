@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+logs/
+data/*.db
+data/STOP_GLOBAL
+data/confirmation_reel.json
+data/etat_compte.json
+data/calendrier.csv
+data/*.tmp
+.pytest_cache/
+data/PAUSE
