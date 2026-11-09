@@ -7,7 +7,7 @@ textColor = "#E6E6E6"
 font = "sans serif"
 
 [server]
-headless = false
+headless = true   # pas de question "Email" au premier lancement ; start_bot.bat ouvre le navigateur
 port = 8501
 address = "localhost"
 
