@@ -1,0 +1,11 @@
+# CHRONYX AI TRADING BOT - dependances (Python 3.10 a 3.13, 64 bits ; 3.12 recommande)
+MetaTrader5>=5.0.45; sys_platform == "win32"
+pandas>=2.1
+numpy>=1.26
+PyYAML>=6.0
+python-dotenv>=1.0
+keyring>=24
+streamlit>=1.50
+plotly>=5.20
+scikit-learn>=1.4
+pytest>=8.0
