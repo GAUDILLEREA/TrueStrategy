@@ -21,7 +21,7 @@ import streamlit as st  # noqa: E402
 from chronyx import __version__  # noqa: E402
 from chronyx.backtest.engine import BacktestConfig, run_backtest, run_periods  # noqa: E402
 from chronyx.backtest.metrics import robustness_score  # noqa: E402
-from chronyx.brokers.comparison import comparison_table, load_brokers  # noqa: E402
+from chronyx.brokers.comparison import broker_alert, comparison_table, load_brokers  # noqa: E402
 from chronyx.config import load_config, validate  # noqa: E402
 from chronyx.data.storage import Storage  # noqa: E402
 from chronyx.engine.pipeline import analyze, default_account_state  # noqa: E402
@@ -69,6 +69,9 @@ with st.sidebar:
     mode = Mode(cfg.mode)
     st.markdown(f"**Mode :** {mode.label}")
     st.markdown(f"**Source :** {source.name}")
+    st.markdown(f"**Broker :** {cfg.get('broker', 'nom', default='—')}")
+    if broker_alert(cfg.get("broker", "nom", default="")):
+        st.caption("⚠️ Alerte réglementaire sur ce broker : compte DÉMO conseillé (voir onglet Brokers).")
     st.divider()
     if pause_active():
         st.warning("⏸️ ROBOT EN PAUSE")
@@ -410,6 +413,9 @@ with tabs[9]:
     st.divider()
     st.markdown("### 🔴 MODE 4 - TRADING RÉEL")
     st.error("Le trading réel est désactivé par défaut. Il peut entraîner la perte de tout le capital déposé.")
+    alert = broker_alert(cfg.get("broker", "nom", default=""))
+    if alert:
+        st.error(f"🚨 Broker configuré ({cfg.get('broker', 'nom')}) : {alert}")
     strategies_on = [n for n, s in (cfg.get("strategies") or {}).items() if s.get("actif")]
     st.table(pd.DataFrame({"Valeur": {
         "Capital (balance)": eur(float(account["balance"])), "Broker / serveur": str(account.get("server")),

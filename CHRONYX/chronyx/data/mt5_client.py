@@ -48,6 +48,7 @@ class MT5Client:
         self.suffix = symbol_suffix
         self.connected = False
         self._utc_offset_s: int | None = None
+        self._symbol_map: dict[str, str] = {}
 
     # ------------------------------------------------------------------ fuseau du serveur
     def server_utc_offset_seconds(self, probe_symbol: str = "EURUSD") -> int:
@@ -128,7 +129,26 @@ class MT5Client:
 
     # ------------------------------------------------------------------ symboles
     def broker_symbol(self, symbol: str) -> str:
-        return f"{symbol}{self.suffix}"
+        """Nom du symbole chez le broker.
+
+        Si aucun suffixe n'est configuré et que le nom standard n'existe pas,
+        cherche automatiquement une variante (ex. XAUUSD+, XAUUSD.r, XAUUSDm)
+        et la mémorise. Le choix est journalisé pour pouvoir être vérifié.
+        """
+        if self.suffix:
+            return f"{symbol}{self.suffix}"
+        if symbol in self._symbol_map:
+            return self._symbol_map[symbol]
+        name = symbol
+        if mt5 is not None and self.connected and mt5.symbol_info(symbol) is None:
+            candidates = [s for s in (mt5.symbols_get(f"{symbol}*") or []) if s.name.startswith(symbol)]
+            tradable = [s for s in candidates if getattr(s, "trade_mode", 4) == 4]  # 4 = trading complet
+            pool = tradable or candidates
+            if pool:
+                name = min(pool, key=lambda s: len(s.name)).name
+                log.info("Symbole %s trouvé chez le broker sous le nom %s", symbol, name)
+        self._symbol_map[symbol] = name
+        return name
 
     def symbol_spec(self, symbol: str) -> SymbolSpec:
         self._require()

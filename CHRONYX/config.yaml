@@ -18,11 +18,12 @@ capital:
   capital_initial: 300.0
 
 broker:
-  # Aucun broker choisi : le robot fonctionne avec n'importe quel broker MT5.
-  nom: "non_choisi"
+  # Broker choisi par l'utilisateur : Vantage, en compte DÉMO au départ.
+  nom: "Vantage"
   # Commission aller-retour par lot standard (en devise du compte). 0 si incluse dans le spread.
   commission_par_lot_aller_retour: 0.0
-  # Suffixe éventuel des symboles chez le broker (ex: ".r", "m", "-ECN")
+  # Suffixe éventuel des symboles (ex: "+", ".r", "m"). Laisser vide : CHRONYX détecte
+  # automatiquement le bon nom (XAUUSD, XAUUSD+, ...) et l'indique dans logs/chronyx.log.
   suffixe_symboles: ""
 
 instruments:

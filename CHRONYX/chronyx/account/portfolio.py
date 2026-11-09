@@ -28,7 +28,10 @@ TRADE_COLUMNS = ["position", "symbole", "sens", "lots", "ouverture", "fermeture"
                  "brut_eur", "frais_eur", "pnl_eur", "robot"]
 
 
-def _strip(symbol: str, suffix: str) -> str:
+def _strip(symbol: str, suffix: str, symbol_map: dict[str, str] | None = None) -> str:
+    for std, broker in (symbol_map or {}).items():
+        if broker == symbol:
+            return std
     return symbol[: -len(suffix)] if suffix and symbol.endswith(suffix) else symbol
 
 
@@ -46,7 +49,7 @@ def open_positions(client, specs: dict[str, SymbolSpec], magic: int, now: dateti
         now_ts = now_ts.tz_localize("UTC")
     rows = []
     for p in raw:
-        sym = _strip(p.symbol, client.suffix)
+        sym = _strip(p.symbol, client.suffix, client._symbol_map)
         spec = specs.get(sym)
         buy = p.type == POSITION_TYPE_BUY
         risk = gain = None
@@ -93,7 +96,7 @@ def closed_trades(client, start: datetime, end: datetime, magic: int) -> pd.Data
         gross = sum(d.profit for d in ds)
         fees = sum(d.commission + d.swap + getattr(d, "fee", 0.0) for d in ds)
         direction = (first_in.type if first_in else 1 - outs[0].type)
-        rows.append({"position": pos_id, "symbole": _strip(ds[0].symbol, client.suffix),
+        rows.append({"position": pos_id, "symbole": _strip(ds[0].symbol, client.suffix, client._symbol_map),
                      "sens": "ACHAT" if direction == DEAL_TYPE_BUY else "VENTE", "lots": vol_out,
                      "ouverture": _ts(first_in.time, offset) if first_in else pd.NaT,
                      "fermeture": _ts(max(d.time for d in outs), offset),

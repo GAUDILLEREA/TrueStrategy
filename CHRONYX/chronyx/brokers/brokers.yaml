@@ -102,8 +102,10 @@ brokers:
     lot_minimum: 0.01
     frais_retrait: null
     statut: a_verifier
-    alerte: "Sans entité UE, les protections ESMA (solde négatif, levier encadré) et le fonds de garantie européen peuvent ne pas s'appliquer. Prudence."
-    notes: "Vérifier sur REGAFI et la liste noire AMF avant tout usage."
+    alerte: "Site www.vantagemarkets.com/fr/ signalé sur la liste noire Forex de l'AMF (juin 2026, d'après une recherche web - à confirmer sur amf-france.org). Sans entité UE, les protections ESMA (solde négatif, levier encadré) et le fonds de garantie européen peuvent ne pas s'appliquer. Compte DÉMO uniquement tant que ce point n'est pas éclairci."
+    liste_noire_amf: true
+    source_alerte: "https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/listes-noires-et-mises-en-garde/forex/wwwvantagemarketscomfr"
+    notes: "Vérifier sur REGAFI et la liste noire AMF avant tout usage en réel."
 
   - nom: Admirals
     entite_ue: "Admirals Europe Ltd"

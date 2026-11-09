@@ -125,3 +125,18 @@ def test_server_time_converted_to_utc(fake):
     df = c.rates("EURUSD", "M5", 3)
     assert df["time"].iloc[0].timestamp() == 1_700_000_000 - 2 * 3600
     assert abs(c.tick("EURUSD")["time"].timestamp() - time.time()) < 5
+
+
+def test_symbol_suffix_autodetected(monkeypatch):
+    f = FakeMT5()
+    names = {"XAUUSD+", "XAUUSD+.x", "EURUSD"}
+    base_info = FakeMT5.symbol_info
+    f.symbol_info = lambda s: base_info(f, s) if s in names else None
+    f.symbols_get = lambda pattern: [SimpleNamespace(name=n, trade_mode=4) for n in sorted(names)
+                                     if n.startswith(pattern.rstrip("*"))]
+    monkeypatch.setattr(mt5_client, "mt5", f)
+    c = mt5_client.MT5Client()
+    c.connect()
+    assert c.broker_symbol("XAUUSD") == "XAUUSD+"      # variante la plus courte
+    assert c.broker_symbol("EURUSD") == "EURUSD"       # nom standard existant
+    assert c.symbol_spec("XAUUSD").name == "XAUUSD"    # le robot garde le nom standard

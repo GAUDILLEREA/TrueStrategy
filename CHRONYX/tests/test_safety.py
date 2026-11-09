@@ -98,7 +98,7 @@ def test_broker_eligibility():
     data = load_brokers()
     status = {b["nom"]: eligibility(b)[0] for b in data["brokers"]}
     assert status["XTB"] == "incompatible"          # pas de MT5
-    assert status["Vantage"] == "prudence"          # pas d'entité UE identifiée
+    assert status["Vantage"] == "alerte AMF"        # liste noire AMF : démo uniquement
     assert all(s != "éligible" for s in status.values())  # rien n'est marqué vérifié sans vérification
     assert len(comparison_table(data)) == len(data["brokers"])
 
@@ -139,3 +139,10 @@ def test_engine_drawdown_triggers_global_stop(tmp_path):
     tracker.data = {"peak": 1000.0}                                   # equity 300 vs pic 1000 => drawdown 70 %
     run_cycle(cfg, src, Storage(tmp_path / "db.sqlite"), tracker, NOW)
     assert guards.kill_switch_active()
+
+
+def test_broker_alert_for_configured_broker():
+    from chronyx.brokers.comparison import broker_alert
+    assert broker_alert("Vantage")
+    assert broker_alert("vantage")
+    assert broker_alert("IC Markets") is None

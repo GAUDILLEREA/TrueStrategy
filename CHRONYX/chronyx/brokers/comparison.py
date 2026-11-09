@@ -26,7 +26,7 @@ def load_brokers(path: Path = BROKERS_FILE) -> dict:
 
 
 def eligibility(b: dict) -> tuple[str, list[str]]:
-    """Renvoie (statut, raisons). Statut : 'incompatible' | 'prudence' | 'à vérifier' | 'éligible'."""
+    """Renvoie (statut, raisons). Statut : 'incompatible' | 'alerte AMF' | 'prudence' | 'à vérifier' | 'éligible'."""
     reasons = []
     if b.get("metatrader5") is False:
         reasons.append("Pas de MetaTrader 5")
@@ -34,6 +34,8 @@ def eligibility(b: dict) -> tuple[str, list[str]]:
         reasons.append("Robots/EA non autorisés")
     if reasons:
         return "incompatible", reasons
+    if b.get("liste_noire_amf"):
+        return "alerte AMF", ["Signalé sur la liste noire de l'AMF : démo uniquement"]
     if not b.get("entite_ue"):
         return "prudence", ["Pas d'entité régulée dans l'UE identifiée"]
     if b.get("statut") != "verifie":
@@ -97,3 +99,12 @@ def measure_spreads(client, symbols: list[str], samples: int = 30, interval_s: f
 def trade_cost_eur(spec, spread_points: float, commission_per_lot_rt: float, lots: float | None = None) -> float:
     lots = lots or spec.volume_min
     return spec.money_for_distance(spread_points * spec.point, lots) + commission_per_lot_rt * lots
+
+
+def broker_alert(name: str, data: dict | None = None) -> str | None:
+    """Alerte réglementaire du broker configuré (None si aucune)."""
+    data = data or load_brokers()
+    for b in data["brokers"]:
+        if b["nom"].lower() == str(name).lower() and (b.get("liste_noire_amf") or not b.get("entite_ue")):
+            return b.get("alerte") or "Pas d'entité régulée dans l'UE identifiée."
+    return None

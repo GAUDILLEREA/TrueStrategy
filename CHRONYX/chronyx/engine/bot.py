@@ -69,8 +69,10 @@ def _refresh_positions(source, state: AccountState) -> None:
     if isinstance(source, MT5Source):
         pos = [p for p in source.client.positions() if p.get("magic") == MAGIC]
         state.open_positions = len(pos)
+        reverse = {v: k for k, v in source.client._symbol_map.items()}
         suffix = source.client.suffix
-        state.open_symbols = {p["symbol"][: len(p["symbol"]) - len(suffix)] if suffix else p["symbol"] for p in pos}
+        state.open_symbols = {reverse.get(p["symbol"], p["symbol"][: len(p["symbol"]) - len(suffix)] if suffix
+                                         else p["symbol"]) for p in pos}
 
 
 def _check_recent_losses(source, tracker: AccountTracker, now: datetime) -> None:

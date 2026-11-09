@@ -77,7 +77,7 @@ def _positions(ctx: Ctx) -> pd.DataFrame:
     raw = mt5_client.mt5.positions_get() or []
     specs = {}
     for p in raw:
-        sym = pf._strip(p.symbol, ctx.source.client.suffix)
+        sym = pf._strip(p.symbol, ctx.source.client.suffix, ctx.source.client._symbol_map)
         try:
             specs[sym] = ctx.source.spec(sym)
         except Exception:
