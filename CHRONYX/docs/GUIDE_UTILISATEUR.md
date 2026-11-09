@@ -17,6 +17,9 @@
 | Onglet | Contenu |
 |---|---|
 | 🏠 Tableau de bord | Capital, balance, equity, P&L, drawdown, positions, trades du jour, statut, synthèse par instrument |
+| 💼 Positions & résultats | Positions ouvertes (P&L, perte au SL, gain au TP, bouton *Fermer*), gains/pertes par période, courbe cumulée, résultat par jour, instruments tradés, historique exportable en CSV |
+| 🛡️ Gestion du risque | Jauges colorées : perte du jour/semaine, drawdown, risque ouvert, positions, trades du jour ; règles actives |
+| ⏸️ Pause & retraits | Pause / reprise, fermeture de toutes les positions, procédure de retrait, simulateur de retrait, dépôts et retraits enregistrés |
 | 📈 Analyse en direct | Graphique chandeliers + EMA, S/R, SL/TP, RSI, MACD, ATR ; explication complète du signal ; raisons d'absence de trade ; prochaine annonce |
 | 💶 Capital & faisabilité | Risque au lot minimum, marge, poids des frais, verdict par instrument et timeframe |
 | 🧪 Backtest | Statistiques complètes, courbe de capital, robustesse par période, liste des trades |
@@ -24,6 +27,12 @@
 | 📚 Stratégies | Statut de chaque stratégie |
 | ⚙️ Paramètres | Risque, R/R, SL, break-even, trailing, limites de pertes, spreads, instruments, mode ; activation du réel |
 | 📜 Journal | Événements, signaux, ordres |
+
+**Bouton ⏸️ Pause** (barre latérale et onglet *Pause & retraits*) : le robot n'ouvre plus de position, mais les
+positions déjà ouvertes restent ouvertes, protégées par leur SL/TP. Fonctionne aussi dashboard fermé (fichier `data/PAUSE`).
+
+**Retraits** : CHRONYX ne peut pas retirer d'argent (sécurité volontaire). Le retrait se fait dans l'espace client du
+broker. Mettez d'abord le robot en pause, laissez les positions se clôturer, retirez, puis reprenez.
 
 **Bouton ⛔ STOP GLOBAL** (barre latérale) : bloque toute nouvelle position ; le moteur ferme les positions ouvertes par CHRONYX.
 Il reste actif jusqu'à ce que vous le leviez manuellement.

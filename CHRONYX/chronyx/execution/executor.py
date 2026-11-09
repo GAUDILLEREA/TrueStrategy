@@ -86,6 +86,33 @@ def _filling_mode(symbol: str):
     return mt5.ORDER_FILLING_RETURN
 
 
+def _close_one(mt5, p, comment: str) -> tuple[bool, str]:
+    tick = mt5.symbol_info_tick(p.symbol)
+    is_buy = p.type == mt5.POSITION_TYPE_BUY
+    req = {"action": mt5.TRADE_ACTION_DEAL, "symbol": p.symbol, "volume": p.volume, "position": p.ticket,
+           "type": mt5.ORDER_TYPE_SELL if is_buy else mt5.ORDER_TYPE_BUY,
+           "price": tick.bid if is_buy else tick.ask, "deviation": MAX_DEVIATION_POINTS, "magic": MAGIC,
+           "comment": comment, "type_time": mt5.ORDER_TIME_GTC, "type_filling": _filling_mode(p.symbol)}
+    res = mt5.order_send(req)
+    ok = res is not None and res.retcode == mt5.TRADE_RETCODE_DONE
+    return ok, str(getattr(res, "comment", mt5.last_error()))
+
+
+def close_position(client: mt5_client.MT5Client, storage: Storage, ticket: int) -> None:
+    """Fermeture MANUELLE d'une position, demandée par l'utilisateur depuis le dashboard."""
+    mt5 = mt5_client.mt5
+    if mt5 is None or not client.connected:
+        raise OrderRefused("MetaTrader 5 non connecté.")
+    pos = mt5.positions_get(ticket=ticket)
+    if not pos:
+        raise OrderRefused(f"Position {ticket} introuvable (déjà fermée ?).")
+    ok, msg = _close_one(mt5, pos[0], "CHRONYX manuel")
+    if not ok:
+        storage.log_event("ERROR", "fermeture", f"Échec de fermeture de la position {ticket}", {"retour": msg})
+        raise OrderRefused(f"Fermeture refusée par le broker : {msg}")
+    storage.log_event("INFO", "fermeture", f"Position {ticket} ({pos[0].symbol}) fermée manuellement")
+
+
 def close_all_positions(client: mt5_client.MT5Client, storage: Storage, only_chronyx: bool = True) -> int:
     """STOP GLOBAL : ferme les positions ouvertes par CHRONYX (ou toutes)."""
     mt5 = mt5_client.mt5
@@ -95,17 +122,10 @@ def close_all_positions(client: mt5_client.MT5Client, storage: Storage, only_chr
     for p in mt5.positions_get() or []:
         if only_chronyx and p.magic != MAGIC:
             continue
-        tick = mt5.symbol_info_tick(p.symbol)
-        is_buy = p.type == mt5.POSITION_TYPE_BUY
-        req = {"action": mt5.TRADE_ACTION_DEAL, "symbol": p.symbol, "volume": p.volume, "position": p.ticket,
-               "type": mt5.ORDER_TYPE_SELL if is_buy else mt5.ORDER_TYPE_BUY,
-               "price": tick.bid if is_buy else tick.ask, "deviation": MAX_DEVIATION_POINTS, "magic": MAGIC,
-               "comment": "CHRONYX STOP", "type_time": mt5.ORDER_TIME_GTC, "type_filling": _filling_mode(p.symbol)}
-        res = mt5.order_send(req)
-        if res is not None and res.retcode == mt5.TRADE_RETCODE_DONE:
+        ok, msg = _close_one(mt5, p, "CHRONYX STOP")
+        if ok:
             closed += 1
         else:
-            storage.log_event("ERROR", "stop_global", f"Échec de fermeture de la position {p.ticket}",
-                              {"retour": getattr(res, "comment", None)})
+            storage.log_event("ERROR", "stop_global", f"Échec de fermeture de la position {p.ticket}", {"retour": msg})
     storage.log_event("WARNING", "stop_global", f"{closed} position(s) fermée(s) par STOP GLOBAL")
     return closed

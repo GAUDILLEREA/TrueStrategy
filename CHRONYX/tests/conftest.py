@@ -13,6 +13,7 @@ from chronyx.risk import guards  # noqa: E402
 def isolated_kill_switch(tmp_path, monkeypatch):
     """Chaque test utilise son propre fichier STOP_GLOBAL (jamais celui de l'utilisateur)."""
     monkeypatch.setattr(guards, "KILL_SWITCH_FILE", tmp_path / "STOP_GLOBAL")
+    monkeypatch.setattr(guards, "PAUSE_FILE", tmp_path / "PAUSE")
     yield
 
 

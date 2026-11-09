@@ -30,9 +30,11 @@ from chronyx.execution.modes import (CONFIRMATION_PHRASE, Mode, order_gate, revo
                                      risk_fingerprint, write_real_confirmation)
 from chronyx.news.calendar import load_calendar, news_mask  # noqa: E402
 from chronyx.risk.feasibility import assess  # noqa: E402
-from chronyx.risk.guards import activate_kill_switch, kill_switch_active, release_kill_switch  # noqa: E402
+from chronyx.risk.guards import (activate_kill_switch, activate_pause, kill_switch_active, pause_active,  # noqa: E402
+                                 release_kill_switch, release_pause)
 from chronyx.strategies.registry import IMPLEMENTED, PLANNED, build  # noqa: E402
 from charts import equity_chart, price_chart  # noqa: E402
+from account_tabs import Ctx, render_pause, render_positions, render_risk  # noqa: E402
 
 st.set_page_config(page_title="CHRONYX AI Trading Bot", page_icon="⚡", layout="wide")
 st.markdown("""<style>
@@ -68,6 +70,18 @@ with st.sidebar:
     st.markdown(f"**Mode :** {mode.label}")
     st.markdown(f"**Source :** {source.name}")
     st.divider()
+    if pause_active():
+        st.warning("⏸️ ROBOT EN PAUSE")
+        if st.button("▶️ Reprendre", width="stretch", disabled=kill_switch_active()):
+            release_pause()
+            storage.log_event("INFO", "pause", "Reprise du trading (barre latérale)")
+            st.rerun()
+    else:
+        if st.button("⏸️ Pause", width="stretch",
+                     help="Plus aucune nouvelle position ; les positions ouvertes restent protégées par SL/TP."):
+            activate_pause("barre latérale")
+            storage.log_event("INFO", "pause", "Robot mis en pause (barre latérale)")
+            st.rerun()
     if kill_switch_active():
         st.error("⛔ STOP GLOBAL ACTIF")
         if st.button("Lever le STOP GLOBAL"):
@@ -94,7 +108,8 @@ cal_cfg = cfg.get("calendrier", default={}) or {}
 calendar = load_calendar(cfg.path_for(cal_cfg.get("fichier", "data/calendrier.csv")),
                          float(cal_cfg.get("age_max_heures", 24)), now)
 
-tabs = st.tabs(["🏠 Tableau de bord", "📈 Analyse en direct", "💶 Capital & faisabilité", "🧪 Backtest",
+tabs = st.tabs(["🏠 Tableau de bord", "💼 Positions & résultats", "🛡️ Gestion du risque", "⏸️ Pause & retraits",
+                "📈 Analyse en direct", "💶 Capital & faisabilité", "🧪 Backtest",
                 "🏦 Brokers", "📚 Stratégies", "⚙️ Paramètres", "📜 Journal"])
 
 # ================================================================ 1. TABLEAU DE BORD
@@ -133,8 +148,17 @@ with tabs[0]:
     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
     st.info(f"Calendrier économique : {calendar.message}")
 
-# ================================================================ 2. ANALYSE EN DIRECT
+# ================================================================ POSITIONS / RISQUE / PAUSE
+ctx = Ctx(cfg, source, storage, account, now)
 with tabs[1]:
+    render_positions(ctx)
+with tabs[2]:
+    render_risk(ctx)
+with tabs[3]:
+    render_pause(ctx)
+
+# ================================================================ 2. ANALYSE EN DIRECT
+with tabs[4]:
     sym = st.selectbox("Instrument", cfg.active_symbols or ["XAUUSD"], key="live_sym")
     a = analyze(cfg, source, sym, calendar, state, now)
     left, right = st.columns([2.2, 1])
@@ -189,7 +213,7 @@ with tabs[1]:
                     st.error(str(e))
 
 # ================================================================ 3. CAPITAL & FAISABILITÉ
-with tabs[2]:
+with tabs[5]:
     st.subheader("Le scalping est-il viable avec votre capital ?")
     c1, c2, c3 = st.columns(3)
     capital = c1.slider("Capital (€)", 100, 500, int(min(500, max(100, float(cfg.get("capital", "capital_initial"))))), 10)
@@ -232,7 +256,7 @@ with tabs[2]:
             "le robot refusera tout trade dont le risque minimum dépasse votre limite.")
 
 # ================================================================ 4. BACKTEST
-with tabs[3]:
+with tabs[6]:
     st.subheader("Backtest")
     c = st.columns(4)
     bt_sym = c[0].selectbox("Instrument", symbols, key="bt_sym")
@@ -294,7 +318,7 @@ with tabs[3]:
             st.dataframe(res.trades.tail(200), width="stretch", hide_index=True)
 
 # ================================================================ 5. BROKERS
-with tabs[4]:
+with tabs[7]:
     st.subheader("Comparaison des brokers (aucune sélection automatique)")
     st.warning("Ces données sont à vérifier sur les sources officielles avant toute décision. "
                "CHRONYX n'ouvre aucun compte et ne dépose aucun fonds.")
@@ -313,7 +337,7 @@ with tabs[4]:
         st.caption("Connectez un compte démo MT5 pour mesurer les spreads réels de chaque broker.")
 
 # ================================================================ 6. STRATÉGIES
-with tabs[5]:
+with tabs[8]:
     st.subheader("Bibliothèque de stratégies")
     st.table(pd.DataFrame([{"Stratégie": c.label, "Statut": "Implémentée - à valider par backtest/démo",
                             "Description": c.description} for c in IMPLEMENTED.values()] +
@@ -322,7 +346,7 @@ with tabs[5]:
     st.caption("Aucune stratégie n'est considérée comme rentable avant d'avoir été testée sur des données réelles.")
 
 # ================================================================ 7. PARAMÈTRES
-with tabs[6]:
+with tabs[9]:
     st.subheader("Paramètres du robot")
     raw = cfg.raw
     r = raw["risque"]
@@ -418,7 +442,7 @@ with tabs[6]:
         st.success("Mode réel révoqué, retour au mode ANALYSE.")
 
 # ================================================================ 8. JOURNAL
-with tabs[7]:
+with tabs[10]:
     st.subheader("Journal")
     which = st.radio("Table", ["events", "signals", "orders"], horizontal=True,
                      format_func={"events": "Événements", "signals": "Signaux", "orders": "Ordres"}.get)

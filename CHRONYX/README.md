@@ -26,7 +26,8 @@ avec une priorité absolue donnée à la **sécurité**, à la **gestion du risq
 | Backtest (spread bid/ask, commission, slippage, swap, gaps, SL prioritaire) + statistiques + robustesse | ✅ testé |
 | 4 modes (Analyse / Assistance / Démo auto / Réel verrouillé) | ✅ verrou testé ; envoi d'ordres **à tester en démo** |
 | Comparateur de brokers (données réglementaires à vérifier, mesure des spreads réels en démo) | ✅ testé |
-| Dashboard sombre en français (8 onglets) | ✅ testé dans un navigateur |
+| Dashboard sombre en français (11 onglets) | ✅ testé dans un navigateur |
+| Positions ouvertes, gains/pertes, instruments tradés, jauges de risque, pause, aide au retrait | ✅ (lecture MT5 🟡 à valider en démo) |
 | Stratégies B à E, module IA, recherche de stratégies | ⏳ phases suivantes |
 
 Voir [docs/ETAT_DU_PROJET.md](docs/ETAT_DU_PROJET.md) pour le détail phase par phase.

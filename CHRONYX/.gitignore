@@ -10,3 +10,4 @@ data/etat_compte.json
 data/calendrier.csv
 data/*.tmp
 .pytest_cache/
+data/PAUSE

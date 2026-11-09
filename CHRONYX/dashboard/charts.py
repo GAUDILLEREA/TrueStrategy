@@ -56,3 +56,37 @@ def equity_chart(equity: pd.DataFrame, title: str = "Courbe de capital") -> go.F
     fig.update_layout(template="plotly_dark", height=320, title=title, margin=dict(l=10, r=10, t=40, b=10),
                       paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", yaxis_title="€")
     return fig
+
+
+def _layout(fig: go.Figure, title: str, height: int = 320) -> go.Figure:
+    fig.update_layout(template="plotly_dark", height=height, title=title, margin=dict(l=10, r=10, t=40, b=10),
+                      paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", showlegend=False)
+    return fig
+
+
+def cumulative_pnl_chart(trades: pd.DataFrame) -> go.Figure:
+    t = trades.sort_values("fermeture")
+    cum = t["pnl_eur"].cumsum()
+    color = UP if (cum.iloc[-1] if len(cum) else 0) >= 0 else DOWN
+    fig = go.Figure(go.Scatter(x=t["fermeture"], y=cum, mode="lines+markers", line=dict(color=color, width=2),
+                               marker=dict(size=5, color=[UP if v > 0 else DOWN for v in t["pnl_eur"]]),
+                               hovertemplate="%{x|%d/%m %H:%M}<br>Cumul : %{y:.2f} €<extra></extra>"))
+    fig.add_hline(y=0, line=dict(color=MUTED, width=0.8))
+    return _layout(fig, "Gains / pertes cumulés (€)")
+
+
+def daily_pnl_chart(daily: pd.DataFrame) -> go.Figure:
+    fig = go.Figure(go.Bar(x=daily["jour"].astype(str), y=daily["pnl_eur"],
+                           marker_color=[UP if v >= 0 else DOWN for v in daily["pnl_eur"]],
+                           hovertemplate="%{x}<br>%{y:.2f} €<extra></extra>"))
+    return _layout(fig, "Résultat par jour (€)")
+
+
+def instrument_pnl_chart(by_inst: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=by_inst["symbole"], x=by_inst["gains"], orientation="h", marker_color=UP, name="Gains"))
+    fig.add_trace(go.Bar(y=by_inst["symbole"], x=by_inst["pertes"], orientation="h", marker_color=DOWN, name="Pertes"))
+    fig.add_trace(go.Scatter(y=by_inst["symbole"], x=by_inst["pnl_eur"], mode="markers", name="Net",
+                             marker=dict(color="white", size=10, symbol="diamond")))
+    fig.update_layout(barmode="relative")
+    return _layout(fig, "Gains et pertes par instrument (€) — ◆ = net", height=max(220, 70 * len(by_inst) + 80))

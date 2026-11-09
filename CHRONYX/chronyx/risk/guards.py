@@ -14,6 +14,9 @@ from zoneinfo import ZoneInfo
 from ..config import ROOT
 
 KILL_SWITCH_FILE = ROOT / "data" / "STOP_GLOBAL"
+# PAUSE : plus aucune nouvelle position, mais les positions ouvertes sont CONSERVÉES
+# (protégées par leur SL/TP côté broker). Le STOP GLOBAL, lui, ferme tout.
+PAUSE_FILE = ROOT / "data" / "PAUSE"
 
 _DAYS_FR = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
@@ -30,6 +33,27 @@ def activate_kill_switch(reason: str, path: Path | None = None) -> None:
 
 def release_kill_switch(path: Path | None = None) -> None:
     path = path or KILL_SWITCH_FILE
+    if path.exists():
+        path.unlink()
+
+
+def pause_active(path: Path | None = None) -> bool:
+    return (path or PAUSE_FILE).exists()
+
+
+def pause_info(path: Path | None = None) -> str:
+    p = path or PAUSE_FILE
+    return p.read_text(encoding="utf-8").strip() if p.exists() else ""
+
+
+def activate_pause(reason: str = "", path: Path | None = None) -> None:
+    path = path or PAUSE_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{datetime.now():%d/%m/%Y %H:%M} | {reason}\n", encoding="utf-8")
+
+
+def release_pause(path: Path | None = None) -> None:
+    path = path or PAUSE_FILE
     if path.exists():
         path.unlink()
 
@@ -58,6 +82,8 @@ class RiskGuard:
         out: list[str] = []
         if kill_switch_active():
             out.append("STOP GLOBAL activé : aucune nouvelle position.")
+        if pause_active():
+            out.append("Robot en PAUSE : aucune nouvelle position (positions ouvertes conservées).")
         day_loss = (s.start_of_day_balance - s.equity) / s.start_of_day_balance * 100
         if day_loss >= self.r["perte_max_jour_pct"]:
             out.append(f"Perte du jour {day_loss:.2f} % >= limite {self.r['perte_max_jour_pct']} %.")

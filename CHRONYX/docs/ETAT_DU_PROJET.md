@@ -24,10 +24,11 @@ CHRONYX/
 │   ├── news/        calendar (filtre fail-closed), importer
 │   ├── backtest/    engine, metrics (stats + robustesse)
 │   ├── brokers/     brokers.yaml, comparison
+│   ├── account/     portfolio (positions, historique, gains/pertes, dépôts/retraits, jauges de risque)
 │   ├── execution/   modes (verrou du réel), executor (ordres MT5 avec SL/TP, anti-doublon)
 │   └── engine/      sources (MT5 / simulation), pipeline (décision unique), bot (moteur autonome)
-├── dashboard/       app.py (Streamlit), charts.py (Plotly)
-├── tests/           61 tests pytest
+├── dashboard/       app.py (Streamlit), account_tabs.py (positions / risque / pause & retraits), charts.py (Plotly)
+├── tests/           69 tests pytest
 └── docs/
 ```
 
@@ -50,6 +51,7 @@ que ce qui est affiché soit exactement ce que le robot ferait.
 | 10 | Module IA (régimes, sélection de stratégie, validation walk-forward) | ⏳ (régime à règles en place) |
 | 11 | Démo automatique | 🟡 exécuteur + verrou écrits, verrou ✅ ; envoi d'ordres à valider en démo |
 | 12 | Tests et documentation | ✅ pour la v0.1 |
+| + | Écrans Positions & résultats, Gestion du risque, Pause & retraits | ✅ interface testée ; lecture MT5 testée avec un faux MT5 (🟡 à confirmer en démo) |
 
 ## Limites connues de la v0.1
 
